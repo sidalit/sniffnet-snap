@@ -1,0 +1,67 @@
+name: sniffnet
+base: core26
+version: '1.5.1'
+title: Sniffnet
+icon: snap/gui/sniffnet.png
+summary: Inspect network traffic and analyze packet capture files
+description: |
+  Sniffnet visualizes network traffic, connections, services and hosts.
+  Analyze saved packet captures, filter traffic, export reports and set
+  notifications with a native desktop interface.
+
+  This package supports saved-capture analysis. Live capture and host process
+  attribution are unavailable under its strict confinement.
+license: MIT OR Apache-2.0
+grade: stable
+confinement: strict
+website: https://sniffnet.app
+source-code:
+  - https://github.com/GyulyVGC/sniffnet
+  - https://github.com/sidalit/sniffnet-snap
+issues:
+  - https://github.com/GyulyVGC/sniffnet/issues
+  - https://github.com/sidalit/sniffnet-snap/issues
+contact: https://github.com/sidalit/sniffnet-snap/issues
+
+platforms:
+  amd64:
+  arm64:
+
+apps:
+  sniffnet:
+    command: bin/sniffnet
+    extensions: [gnome]
+    plugs:
+      - audio-playback
+      - home
+      - network
+      - removable-media
+
+parts:
+  sniffnet:
+    plugin: rust
+    source: https://github.com/GyulyVGC/sniffnet.git
+    source-tag: v$SNAPCRAFT_PROJECT_VERSION
+    source-depth: 1
+    rust-channel: stable
+    build-packages:
+      - build-essential
+      - libasound2-dev
+      - libfontconfig-dev
+      - libpcap-dev
+      - pkg-config
+    stage-packages:
+      - libpcap0.8t64
+      - libxkbcommon-x11-0
+    override-pull: |
+      craftctl default
+      sed -i \
+        -e 's/id: Some(String::from(SNIFFNET_LOWERCASE))/id: Some(String::from("sniffnet_sniffnet"))/' \
+        -e 's/application_id: String::from(SNIFFNET_LOWERCASE)/application_id: String::from("sniffnet_sniffnet")/' \
+        src/main.rs
+    override-build: |
+      craftctl default
+      install -Dm644 LICENSE-MIT LICENSE-APACHE \
+        -t "$CRAFT_PART_INSTALL/usr/share/doc/sniffnet"
+      install -Dm644 "$CRAFT_PROJECT_DIR/snap/gui/sniffnet.png" \
+        "$CRAFT_PART_INSTALL/usr/share/icons/hicolor/256x256/apps/sniffnet_sniffnet.png"

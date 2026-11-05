@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Sniffnet
+Comment=Inspect network traffic and analyze packet captures
+Exec=sniffnet
+Icon=${SNAP}/meta/gui/sniffnet.png
+Terminal=false
+Type=Application
+Categories=Network;Monitor;
+Keywords=network;traffic;packet;capture;pcap;
+StartupWMClass=sniffnet_sniffnet
