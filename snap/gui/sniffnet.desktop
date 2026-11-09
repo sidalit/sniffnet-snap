@@ -7,4 +7,4 @@ Terminal=false
 Type=Application
 Categories=Network;Monitor;
 Keywords=network;traffic;packet;capture;pcap;
-StartupWMClass=sniffnet_sniffnet
+StartupWMClass=sniffnet

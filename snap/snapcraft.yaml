@@ -53,15 +53,9 @@ parts:
     stage-packages:
       - libpcap0.8t64
       - libxkbcommon-x11-0
-    override-pull: |
-      craftctl default
-      sed -i \
-        -e 's/id: Some(String::from(SNIFFNET_LOWERCASE))/id: Some(String::from("sniffnet_sniffnet"))/' \
-        -e 's/application_id: String::from(SNIFFNET_LOWERCASE)/application_id: String::from("sniffnet_sniffnet")/' \
-        src/main.rs
     override-build: |
       craftctl default
       install -Dm644 LICENSE-MIT LICENSE-APACHE \
         -t "$CRAFT_PART_INSTALL/usr/share/doc/sniffnet"
       install -Dm644 "$CRAFT_PROJECT_DIR/snap/gui/sniffnet.png" \
-        "$CRAFT_PART_INSTALL/usr/share/icons/hicolor/256x256/apps/sniffnet_sniffnet.png"
+        "$CRAFT_PART_INSTALL/usr/share/icons/hicolor/256x256/apps/sniffnet.png"
