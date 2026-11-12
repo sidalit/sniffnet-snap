@@ -3,14 +3,16 @@ base: core26
 version: '1.5.1'
 title: Sniffnet
 icon: snap/gui/sniffnet.png
-summary: Inspect network traffic and analyze packet capture files
+summary: Monitor network traffic and analyze packet capture files
 description: |
   Sniffnet visualizes network traffic, connections, services and hosts.
-  Analyze saved packet captures, filter traffic, export reports and set
-  notifications with a native desktop interface.
+  Capture live traffic or analyze saved packet captures, filter traffic,
+  export reports and set notifications with a native desktop interface.
 
-  This package supports saved-capture analysis. Live capture and host process
-  attribution are unavailable under its strict confinement.
+  Saved-capture analysis works out of the box. Live capture needs the
+  network-control and network-observe interfaces connected and Sniffnet run
+  as root; see the project page for the steps. Host process attribution is
+  unavailable under strict confinement.
 license: MIT OR Apache-2.0
 grade: stable
 confinement: strict
@@ -35,10 +37,43 @@ apps:
       - audio-playback
       - home
       - network
+      - network-control
+      - network-observe
       - removable-media
 
 parts:
+  # libpcap fails the whole device scan when strict confinement denies its
+  # Bluetooth or netfilter probes, so build it without those backends.
+  libpcap:
+    plugin: nil
+    source: https://github.com/the-tcpdump-group/libpcap.git
+    source-tag: libpcap-1.10.7
+    source-depth: 1
+    build-packages:
+      - autoconf
+      - automake
+      - bison
+      - build-essential
+      - flex
+    override-build: |
+      ./autogen.sh
+      ./configure \
+        --prefix=/usr \
+        --libdir="/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR" \
+        --disable-bluetooth \
+        --disable-dbus \
+        --disable-rdma \
+        --without-libnl \
+        ac_cv_netfilter_can_compile=no
+      make -j"$CRAFT_PARALLEL_BUILD_COUNT"
+      make install DESTDIR="$CRAFT_PART_INSTALL"
+      install -Dm644 LICENSE -t "$CRAFT_PART_INSTALL/usr/share/doc/libpcap"
+    prime:
+      - usr/lib/*/libpcap.so.*
+      - usr/share/doc/libpcap
+
   sniffnet:
+    after: [libpcap]
     plugin: rust
     source: https://github.com/GyulyVGC/sniffnet.git
     source-tag: v$SNAPCRAFT_PROJECT_VERSION
@@ -48,10 +83,11 @@ parts:
       - build-essential
       - libasound2-dev
       - libfontconfig-dev
-      - libpcap-dev
       - pkg-config
+    build-environment:
+      - LIBPCAP_LIBDIR: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR
+      - LIBPCAP_VER: 1.10.7
     stage-packages:
-      - libpcap0.8t64
       - libxkbcommon-x11-0
     override-build: |
       craftctl default

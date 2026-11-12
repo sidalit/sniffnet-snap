@@ -29,7 +29,26 @@ sudo snap install sniffnet
 sniffnet
 ```
 
-Choose a saved packet capture from your home directory to analyze it. **This snap supports saved-capture analysis; live capture is unavailable.**
+Choose a saved packet capture from your home directory to analyze it.
+
+### Live capture
+
+Live capture needs raw network access, which only root has. Connect the interfaces once, then run Sniffnet with `sudo`:
+
+```bash
+sudo snap connect sniffnet:network-control
+sudo snap connect sniffnet:network-observe
+```
+
+On a graphical session, allow root to open a window for the duration of the run:
+
+```bash
+xhost +SI:localuser:root
+sudo sniffnet
+xhost -SI:localuser:root
+```
+
+`xhost +SI:localuser:root` lets local root processes use your display until you revoke it or log out. Run the last command when you are done.
 
 ## Configure
 
@@ -43,9 +62,11 @@ sudo snap connect sniffnet:removable-media
 
 ## Limitations
 
-- Live capture requires privileges that this desktop snap does not grant. Capture traffic with a separate host tool, then open the saved file in Sniffnet.
-- Host process attribution is unavailable. Top-level hidden home directories and files outside permitted locations remain confined.
-- If GPU rendering fails, try `ICED_BACKEND=tiny-skia sniffnet`. Updates come through `snap refresh sniffnet`.
+- Live capture works only as root. Settings for root runs live in `/root/snap/sniffnet`, separate from your user settings. Notification sounds may be silent under `sudo`.
+- The bundled libpcap omits Bluetooth, D-Bus, RDMA and netfilter (NFLOG/NFQUEUE) capture, which strict confinement would block.
+-Top-level hidden home directories and files outside permitted locations remain confined.
+- If GPU rendering fails, try `ICED_BACKEND=tiny-skia sniffnet`.
+- Updates come through `snap refresh sniffnet`.
 
 ## Build
 
